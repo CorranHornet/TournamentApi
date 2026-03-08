@@ -50,9 +50,14 @@ namespace TournamentApi.Services
             
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public  async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var tournament = await _context.Tournaments.FindAsync(id);
+            if (tournament == null) return false;
+
+            _context.Tournaments.Remove(tournament);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
