@@ -27,9 +27,11 @@ namespace TournamentApi.Services
             return await _context.Tournaments.FindAsync();
         }
 
-        public Task<Tournament> CreateAsync(Tournament tournament)
+        public async Task<Tournament> CreateAsync(Tournament tournament)
         {
-            throw new NotImplementedException();
+            await _context.Tournaments.AddAsync(tournament);
+            await _context.SaveChangesAsync();
+            return tournament;    
         }
 
         public Task<bool> UpdateAsync(int id, Tournament tournament)
