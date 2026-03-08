@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using TournamentApi.Data;
+using TournamentApi.Models;
+using TournamentApi.Services;
 
 
 
@@ -10,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
+
+
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -19,6 +24,8 @@ builder.Services.AddSwaggerGen();              // Generates interactive document
 // Add AppDbContext to the dependency injection container
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ITournamentService, TournamentService>();
 
 var app = builder.Build();
 

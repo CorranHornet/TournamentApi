@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TournamentApi.Services;
 using TournamentApi.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TournamentApi.Controllers
 {
@@ -8,14 +10,22 @@ namespace TournamentApi.Controllers
     [Route("api/[controller]")]
     public class TournamentsController : ControllerBase
     {
-        // In-memory storage för demo / Swagger-test
+        private readonly ITournamentService _service;
+        public TournamentsController(ITournamentService service)
+        {
+            _service = service;
+        }
+
+       
+     // In-memory storage för demo / Swagger-test
         private static List<Tournament> _tournaments = new();
         private static int _nextId = 1;
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> GetALl(string? search)
         {
-            return Ok(_tournaments);
+            var tournaments = await _service.GetAllAsync(search);
+            return Ok(tournaments);
         }
 
         [HttpPost]
