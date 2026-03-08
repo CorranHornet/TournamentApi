@@ -22,9 +22,9 @@ namespace TournamentApi.Services
             return await query.ToListAsync();
         }
 
-        public Task<Tournament?> GetByIdAsync(int id)
+        public async Task<Tournament?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Tournaments.FindAsync();
         }
 
         public Task<Tournament> CreateAsync(Tournament tournament)
