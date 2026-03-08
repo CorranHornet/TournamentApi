@@ -1,5 +1,6 @@
 ﻿using TournamentApi.Data;
 using TournamentApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TournamentApi.Services
 {
@@ -12,9 +13,13 @@ namespace TournamentApi.Services
             _context = context;
         }
 
-        public Task<IEnumerable<Tournament>> GetAllAsync(string? search = null)
+        public async Task<IEnumerable<Tournament>> GetAllAsync(string? search = null)
         {
-            throw new NotImplementedException();
+            var query = _context.Tournaments.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(t => t.Title.Contains(search));
+            
+            return await query.ToListAsync();
         }
 
         public Task<Tournament?> GetByIdAsync(int id)
