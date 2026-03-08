@@ -34,9 +34,20 @@ namespace TournamentApi.Services
             return tournament;    
         }
 
-        public Task<bool> UpdateAsync(int id, Tournament tournament)
+        public async Task<bool> UpdateAsync(int id, Tournament tournament)
         {
-            throw new NotImplementedException();
+            var existing = await _context.Tournaments.FindAsync(id);
+            if (existing == null) return false;
+
+            existing.Title = tournament.Title;
+            existing.Description = tournament.Description;
+            existing.MaxPlayers = tournament.MaxPlayers;
+            existing.Date = tournament.Date;
+
+            await _context.SaveChangesAsync();
+            return true;
+
+            
         }
 
         public Task<bool> DeleteAsync(int id)
