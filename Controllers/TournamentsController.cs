@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TournamentApi.Services;
-using TournamentApi.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+//using TournamentApi.Models;
+using TournamentApi.Dtos;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 namespace TournamentApi.Controllers
 {
@@ -16,10 +16,12 @@ namespace TournamentApi.Controllers
             _service = service;
         }
 
-       
-     // In-memory storage för demo / Swagger-test
-        private static List<Tournament> _tournaments = new();
-        private static int _nextId = 1;
+
+        //// In-memory storage för demo / Swagger-test
+        //   private static List<Tournament> _tournaments = new();
+        //   private static int _nextId = 1;
+
+
 
         [HttpGet]
         public async Task<IActionResult> GetALl(string? search)
@@ -28,12 +30,44 @@ namespace TournamentApi.Controllers
             return Ok(tournaments);
         }
 
-        [HttpPost]
-        public IActionResult Create(Tournament tournament)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetbyId(int id)
         {
-            tournament.Id = _nextId++;
-            _tournaments.Add(tournament);
+            var tournament = await _service.GetByIdAsync(id);
+
+                if (tournament == null)
+                    return NotFound();
+
             return Ok(tournament);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(TournamentCreateDTO dto)
+        {
+            var created = await _service.CreateAsync(dto);
+            return Ok(created);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, TournamentUpdateDTO dto)
+        {
+            var success = await _service.UpdateAsync(id, dto);
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteAsync(id);
+
+            if (!success)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }
