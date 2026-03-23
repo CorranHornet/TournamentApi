@@ -1,7 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TournamentApi.Data;
+﻿using TournamentApi.Data;
 using TournamentApi.Dtos;
 using TournamentApi.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace TournamentApi.Services
 {
@@ -14,14 +17,20 @@ namespace TournamentApi.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<GameResponseDTO>> GetAllAsync(int? tournamentId = null)
+        public async Task<IEnumerable<GameResponseDTO>> GetAllAsync(int? tournamentId = null, string? search = null)
         {
             var query = _context.Games.AsQueryable();
 
             if (tournamentId.HasValue)
                 query = query.Where(g => g.TournamentId == tournamentId.Value);
 
-            return await query
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string pattern = $"%{search.Trim()}%";
+                query = query.Where(g => EF.Functions.Like(g.Title, pattern));
+            }
+
+            var result = await query
                 .Select(g => new GameResponseDTO
                 {
                     Id = g.Id,
@@ -30,6 +39,8 @@ namespace TournamentApi.Services
                     TournamentId = g.TournamentId
                 })
                 .ToListAsync();
+
+            return result;
         }
 
         public async Task<GameResponseDTO?> GetByIdAsync(int id)

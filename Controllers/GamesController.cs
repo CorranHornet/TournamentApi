@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TournamentApi.Dtos;
 using TournamentApi.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TournamentApi.Controllers
 {
@@ -15,11 +17,15 @@ namespace TournamentApi.Controllers
             _service = service;
         }
 
-        // GET /api/games
+        // GET /api/games?tournamentId=1&search=abc
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? tournamentId = null, [FromQuery] string? search = null)
         {
-            var games = await _service.GetAllAsync();
+            var games = await _service.GetAllAsync(tournamentId, search);
+
+            if (!games.Any())
+                return NotFound(new { message = "No games found matching the criteria." });
+
             return Ok(games);
         }
 
@@ -29,30 +35,32 @@ namespace TournamentApi.Controllers
         {
             var game = await _service.GetByIdAsync(id);
             if (game == null)
-                return NotFound();
+                return NotFound(new { message = $"Game with ID {id} not found" });
 
             return Ok(game);
         }
 
         // POST /api/games
         [HttpPost]
-        public async Task<IActionResult> Create(GameCreateDTO dto)
+        public async Task<IActionResult> Create([FromBody] GameCreateDTO dto)
         {
-            // Validate that the Tournament exists before creating
-            var created = await _service.CreateAsync(dto);
-            if (created == null)
-                return BadRequest("Invalid TournamentId");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var created = await _service.CreateAsync(dto);
             return Ok(created);
         }
 
         // PUT /api/games/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, GameUpdateDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] GameUpdateDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var success = await _service.UpdateAsync(id, dto);
             if (!success)
-                return NotFound();
+                return NotFound(new { message = $"Game with ID {id} not found" });
 
             return NoContent();
         }
@@ -63,7 +71,7 @@ namespace TournamentApi.Controllers
         {
             var success = await _service.DeleteAsync(id);
             if (!success)
-                return NotFound();
+                return NotFound(new { message = $"Game with ID {id} not found" });
 
             return NoContent();
         }
