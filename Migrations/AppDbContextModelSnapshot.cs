@@ -46,7 +46,7 @@ namespace TournamentApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tournaments");
+                    b.ToTable("Tournaments", (string)null);
                 });
 #pragma warning restore 612, 618
         }
