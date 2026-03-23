@@ -31,6 +31,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<IGameService, GameService>();
+
 
 var app = builder.Build();
 
