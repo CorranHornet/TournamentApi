@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using TournamentApi.Data;
 using TournamentApi.Dtos;
 using TournamentApi.Models;
@@ -18,8 +19,13 @@ namespace TournamentApi.Services
         public async Task<IEnumerable<TournamentResponseDTO>> GetAllAsync(string? search = null)
         {
             var query = _context.Tournaments.AsQueryable();
+
+            //Better search handling
             if (!string.IsNullOrWhiteSpace(search))
-                query = query.Where(t => t.Title.ToLower().Contains(search));
+            {
+                var cleanSearch = search.Trim().ToLower();
+                query = query.Where(t => t.Title.ToLower().Contains(cleanSearch));
+            }
 
             return await query
                 .Select(t => new TournamentResponseDTO
@@ -35,6 +41,7 @@ namespace TournamentApi.Services
         public async Task<TournamentResponseDTO?> GetByIdAsync(int id)
         {
             return await _context.Tournaments
+                .Include(t => t.Games)
                 .Where(t => t.Id == id)
                 .Select(t => new TournamentResponseDTO
                 {
@@ -42,7 +49,14 @@ namespace TournamentApi.Services
                     Title = t.Title,
                     Description = t.Description,
                     MaxPlayers = t.MaxPlayers,
-                    
+
+                    Games = t.Games.Select(g => new GameResponseDTO
+                    {
+                        Id = g.Id,
+                        Title = g.Title,
+                        Time = g.Time
+                    }).ToList()
+
                 })
                 .FirstOrDefaultAsync();
         }

@@ -48,6 +48,14 @@ namespace TournamentApi.Services
 
         public async Task<GameResponseDTO> CreateAsync(GameCreateDTO dto)
         {
+            //Validate that the Tournament exists before trying to link a Game to it
+            var tournamentExist = await _context.Tournaments.AnyAsync(t => t.Id == dto.TournamentId);
+            
+            if (!tournamentExist)
+            {
+                return null;
+            }
+            
             var game = new Game
             {
                 Title = dto.Title,
