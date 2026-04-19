@@ -36,15 +36,16 @@ namespace TournamentApi.Controllers
 
         // POST /api/games
         [HttpPost]
-        public async Task<IActionResult> Create(GameCreateDTO dto)
+        public async Task<ActionResult<GameResponseDTO>> Create(GameCreateDTO dto)
         {
-            // Validate that the Tournament exists before creating
-            var created = await _service.CreateAsync(dto);
-            if (created == null)
-                return BadRequest("Invalid TournamentId");
-
-            return Ok(created);
+            var result = await _service.CreateAsync(dto);
+            if (result == null)
+            {
+                return BadRequest($"Creation failed: Tournament ID{dto.TournamentId} does not exist.");
+            }
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+        
 
         // PUT /api/games/{id}
         [HttpPut("{id}")]
